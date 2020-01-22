@@ -1,0 +1,154 @@
+---
+title: "k_means"
+author: "Mhd Omar Bahra"
+date: "11/26/2019"
+output: html_document
+---
+
+read data
+```{r}
+data <- read.csv("dataset.csv")
+k <- 2
+print(data)
+```
+
+initalizing 2 center points based on k
+```{r}
+center_points <- c()
+
+center_points[[1]] = data.frame(x = 1,y =1.5 )
+center_points[[2]] = data.frame(x = 2,y = 1.5)
+
+center_points <- rbind(center_points[[1]], center_points[[2]])
+print(center_points)
+```
+
+
+defining my functions
+```{r}
+calculate_distance <- function(data, center_points, row, i)
+{
+ return(  format(round(sqrt(square(center_points[i,1] - data[row,1]) + square(center_points[i,2] - data[row,2])),2), nsmall = 2))
+}
+square <- function(number)
+{
+  return(number * number)
+}
+maximum=function(a,b)
+{
+  
+  if(!is.na(a) && !is.na(b))
+  {
+    if(as.numeric(a) >= as.numeric(b))
+    {
+      return(1)
+    }
+    return(2)
+  }
+  return(-1)
+}
+
+checkEquality <- function(df1, df2)
+{
+  if(is.null(df1))
+  {
+    return(FALSE)
+  }
+  df1 <- format(round(df1, 2), nsmall=2)
+  df2 <- format(round(df2, 2), nsmall=2)
+  if(isTRUE(all.equal(df1, df2)))
+  {
+    return(TRUE)
+  }
+  return(FALSE)
+}
+```
+
+getting the answer
+```{r}
+averageDataFrame <- c()
+counter <- 1
+while(!checkEquality(averageDataFrame, center_points)) 
+{
+  if(!is.null(averageDataFrame))
+    center_points <- averageDataFrame
+  
+  distance <- c()
+  distanceOne <- c()
+  distanceTwo <- c()
+  
+  classOne <- c()
+  classTwo <- c()
+  
+  classOneXSum <- 0
+  classTwoXSum <- 0
+  
+  classOneYSum <- 0
+  classTwoYSum <- 0
+  
+  for(row in 1:nrow(data))
+  {
+    distanceOne[row] <- calculate_distance(data, center_points, row, 1)
+    distanceTwo[row] <- calculate_distance(data, center_points, row,2)
+  }
+  
+  distance <- cbind(distanceOne, distanceTwo)
+  
+  for(row in 1:nrow(distance))
+  {
+    max <- maximum(distance[row,1], distance[row,2])
+    if(max == 1)
+    {
+      classOne <- append(classOne, row)
+    }
+    else if(max == 2)
+    {
+      classTwo <- append(classTwo, row)
+    }
+  }
+  
+  for(row in 1:nrow(data)) 
+  {
+    if(row %in% classOne)
+    {
+      classOneXSum <- classOneXSum + data[row,1]
+      classOneYSum <- classOneYSum + data[row,2]
+    }
+    else if(row %in% classTwo)
+    {
+      classTwoXSum <- classTwoXSum + data[row,1]
+      classTwoYSum <- classTwoYSum + data[row,2]
+    }
+  }
+  
+  
+  if(length(classOne) > 0)
+  {
+    classOneAvg <- data.frame( x=as.numeric(format(round( (classOneXSum / length(classOne)) ,2), nsmall=2)), y=as.numeric(format(round(classOneYSum / length(classOne), 2), nsmall = 2)))
+  }
+  else
+  {
+    classOneAvg <- data.frame(x=0, y=0)
+  }
+  if(length(classTwo) > 0)
+  {
+    classTwoAvg <- data.frame( x=as.numeric(format(round( (classTwoXSum / length(classTwo)) ,2), nsmall=2)), y=as.numeric(format(round(classTwoYSum / length(classTwo), 2), nsmall = 2)))
+  }
+  else
+  {
+    classTwoAvg <- data.frame(x=0, y=0)
+  }
+  averageDataFrame <- rbind(classTwoAvg, classOneAvg)
+  counter <- counter +1
+}
+
+print(averageDataFrame)
+print(center_points)
+
+classOneData <- data[classOne[],]
+classTwoData <- data[classTwo[],]
+print(classOneData)
+print(classTwoData)
+
+```
+
